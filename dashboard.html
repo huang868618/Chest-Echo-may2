@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <!-- 引入 Tailwind CSS 與 Google Charts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <!-- 引入人文風格字體 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper-color: #f4f1ea;
+      --ink-color: #2d3436;
+      --accent-art: #a67c52;
+    }
+    body { 
+      font-family: 'Noto Sans TC', sans-serif; 
+      background-color: var(--paper-color); 
+      color: var(--ink-color);
+      background-image: url("https://www.transparenttextures.com/patterns/felt.png");
+    }
+    .serif-font { font-family: 'Noto Serif TC', serif; }
+    .art-card { 
+      background: white; 
+      border: 1px solid #dcdde1; 
+      padding: 2rem; 
+      position: relative;
+    }
+    .art-card::before {
+      content: "";
+      position: absolute;
+      top: 5px; left: 5px; right: 5px; bottom: 5px;
+      border: 1px solid #f1f2f6;
+      pointer-events: none;
+    }
+    .chart-container { width: 100%; min-height: 350px; }
+    .stat-value { font-size: 2.5rem; font-weight: 700; color: var(--ink-color); }
+  </style>
+</head>
+<body class="p-6 md:p-12">
+  <div class="max-w-6xl mx-auto">
+    <!-- 標題區 -->
+    <header class="mb-16 text-center">
+      <h1 class="text-4xl tracking-[0.2em] mb-4 serif-font">Chest Echo 報名現況</h1>
+      <div class="w-16 h-px bg-stone-300 mx-auto mb-4"></div>
+      <p class="text-stone-500 italic text-sm tracking-widest uppercase">Real-time Registration Insights</p>
+    </header>
+
+    <!-- 數據概覽卡片 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+      <div class="art-card text-center">
+        <p class="text-[10px] uppercase tracking-[0.2em] text-stone-400 mb-4">總報名人數</p>
+        <p id="totalCount" class="stat-value serif-font">--</p>
+      </div>
+      <div class="art-card text-center">
+        <p class="text-[10px] uppercase tracking-[0.2em] text-stone-400 mb-4">首選熱門時段</p>
+        <p id="hotSlot" class="text-xl font-bold mt-3">--</p>
+      </div>
+      <div class="art-card text-center">
+        <p class="text-[10px] uppercase tracking-[0.2em] text-stone-400 mb-4">最後同步時間</p>
+        <p id="updateTime" class="text-xs text-stone-500 mt-5 italic">--</p>
+      </div>
+    </div>
+
+    <!-- 圖表展示區 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div class="art-card">
+        <h2 class="text-sm uppercase tracking-widest mb-8 border-l-2 border-stone-800 pl-4 serif-font">成員職級分布</h2>
+        <div id="title_chart" class="chart-container"></div>
+      </div>
+      <div class="art-card">
+        <h2 class="text-sm uppercase tracking-widest mb-8 border-l-2 border-stone-800 pl-4 serif-font">實作時段志願序</h2>
+        <div id="slot_chart" class="chart-container"></div>
+      </div>
+    </div>
+
+    <!-- 操作區 -->
+    <div class="mt-16 text-center">
+       <button onclick="location.reload()" class="px-10 py-3 border border-stone-800 text-[10px] uppercase tracking-[0.3em] hover:bg-stone-800 hover:text-white transition-all duration-500">
+         Refresh Dashboard
+       </button>
+    </div>
+
+    <footer class="mt-20 text-center opacity-30 text-[9px] uppercase tracking-[0.4em]">
+      Chest Echo Academic Committee © 2024
+    </footer>
+  </div>
+
+  <script>
+    // 載入 Google 圖表庫
+    google.charts.load('current', {'packages':['corechart', 'bar']});
+    google.charts.setOnLoadCallback(fetchData);
+
+    function fetchData() {
+      // 檢查是否在 Google Apps Script 環境中
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(renderDashboard)
+          .withFailureHandler(function(err) {
+            console.error("GAS Error:", err);
+            showError("無法從 Google Sheets 取得資料。");
+          })
+          .getDashboardData();
+      } else {
+        console.warn("未偵測到 Google Apps Script 環境，加載模擬測試數據。");
+        // 模擬數據用於預覽環境
+        const mockData = [
+          {title: 'PGY1', slots: '3/11, 3/18'},
+          {title: 'PGY2（內科組）', slots: '3/11'},
+          {title: 'R1', slots: '3/18, 3/25'},
+          {title: 'PGY1', slots: '3/11'},
+          {title: 'Fellow', slots: '3/25'}
+        ];
+        renderDashboard(mockData);
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('totalCount').innerText = "Error";
+      console.error(msg);
+    }
+
+    function renderDashboard(data) {
+      if (!data || data.length === 0) {
+        document.getElementById('totalCount').innerText = "0";
+        return;
+      }
+
+      // 更新指標
+      document.getElementById('totalCount').innerText = data.length;
+      document.getElementById('updateTime').innerText = new Date().toLocaleString();
+
+      // 數據處理：職級 (Title)
+      const titleMap = {};
+      data.forEach(row => {
+        const t = row.title || '未分類';
+        titleMap[t] = (titleMap[t] || 0) + 1;
+      });
+      const titleArray = [['職級', '人數']].concat(Object.entries(titleMap));
+
+      // 數據處理：時段 (Slots) - 處理複選字串
+      const slotMap = {};
+      data.forEach(row => {
+        if (row.slots) {
+          const items = row.slots.toString().split(', ');
+          items.forEach(item => {
+            slotMap[item] = (slotMap[item] || 0) + 1;
+          });
+        }
+      });
+      const slotArray = [['時段', '人次']].concat(Object.entries(slotMap));
+
+      // 找出最熱門時段
+      const topSlot = Object.entries(slotMap).sort((a, b) => b[1] - a[1])[0];
+      if (topSlot) document.getElementById('hotSlot').innerText = topSlot[0];
+
+      // 繪圖設定
+      const commonOptions = {
+        backgroundColor: 'transparent',
+        colors: ['#2d3436', '#a67c52', '#8c7e6d', '#dcdde1', '#636e72'],
+        chartArea: { width: '85%', height: '75%' },
+        legend: { position: 'bottom', textStyle: { fontSize: 11, fontName: 'Noto Sans TC' } },
+        animation: { startup: true, duration: 1000, easing: 'out' }
+      };
+
+      // 繪製圓餅圖
+      const pieData = google.visualization.arrayToDataTable(titleArray);
+      const pieChart = new google.visualization.PieChart(document.getElementById('title_chart'));
+      pieChart.draw(pieData, { ...commonOptions, hole: 0.4 });
+
+      // 繪製長條圖
+      const barData = google.visualization.arrayToDataTable(slotArray);
+      const barChart = new google.visualization.BarChart(document.getElementById('slot_chart'));
+      barChart.draw(barData, {
+        ...commonOptions,
+        legend: { position: 'none' },
+        hAxis: { textStyle: { fontSize: 10 }, gridlines: { color: '#f1f2f6' } },
+        vAxis: { textStyle: { fontSize: 11 } }
+      });
+    }
+  </script>
+</body>
+</html>
