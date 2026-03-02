@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chest Echo 課程報名表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入具有藝術氣息的字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper-color: #f4f1ea;
+            --ink-color: #2d3436;
+            --accent-art: #a67c52; /* 焦糖藝術色 */
+            --sub-text: #636e72;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--paper-color);
+            color: var(--ink-color);
+            /* 藝術紙張紋理感 */
+            background-image: url("https://www.transparenttextures.com/patterns/felt.png");
+            line-height: 1.6;
+        }
+
+        h1, h2, .serif-font {
+            font-family: 'Noto Serif TC', serif;
+        }
+
+        .art-card {
+            background: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            border: 1px solid #dcdde1;
+            position: relative;
+        }
+
+        /* 裝飾性線條 */
+        .art-card::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 1px solid #f1f2f6;
+            pointer-events: none;
+            border-radius: 0.2rem;
+        }
+
+        .input-underline {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #dcdde1;
+            transition: all 0.4s ease;
+            border-radius: 0;
+            padding-left: 0;
+        }
+
+        .input-underline:focus {
+            border-bottom-color: var(--accent-art);
+            outline: none;
+        }
+
+        .btn-art {
+            background: var(--ink-color);
+            color: #fff;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+            border-radius: 0;
+        }
+
+        .btn-art:hover {
+            background: var(--accent-art);
+            transform: translateY(-2px);
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--sub-text);
+        }
+
+        .step-active-text {
+            color: var(--accent-art);
+            font-weight: 700;
+        }
+
+        .choice-box {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #efefef;
+            padding: 1rem;
+            display: block;
+        }
+
+        .choice-box:hover {
+            background: #fafafa;
+        }
+
+        .selected-box {
+            border: 1px solid var(--accent-art) !important;
+            background: #fdfaf7 !important;
+        }
+
+        .likert-scale-item {
+            @apply w-12 h-12 flex items-center justify-center border border-slate-200 cursor-pointer transition-all;
+            border-radius: 0;
+        }
+
+        .hidden-input {
+            display: none;
+        }
+
+        /* 頁面進入動畫 */
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="py-16 px-6">
+    <div class="max-w-xl mx-auto fade-in">
+        <!-- Header -->
+        <header class="mb-16 text-center">
+            <div class="mb-6 opacity-60">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="mx-auto">
+                    <rect x="5" y="5" width="30" height="30" stroke="currentColor" stroke-width="1"/>
+                    <path d="M5 20C20 20 20 5 20 5" stroke="currentColor" stroke-width="1"/>
+                    <circle cx="20" cy="20" r="3" fill="currentColor"/>
+                </svg>
+            </div>
+            <h1 class="text-4xl font-light mb-4 tracking-widest text-slate-800">Chest Echo</h1>
+            <div class="w-12 h-px bg-slate-300 mx-auto mb-4"></div>
+            <p class="serif-font text-slate-500 italic text-sm tracking-wide">探尋光影間的生理脈動 · 課程報名</p>
+        </header>
+
+        <!-- Progress Text Indicator -->
+        <div class="flex justify-between mb-12 px-2">
+            <span id="label-1" class="step-label step-active-text">I. 資料</span>
+            <span id="label-2" class="step-label">II. 經驗</span>
+            <span id="label-3" class="step-label">III. 信心</span>
+            <span id="label-4" class="step-label">IV. 期待</span>
+        </div>
+
+        <form id="enrollmentForm" class="art-card p-10 md:p-14 mb-10">
+            <!-- Section 1: 基本資料 -->
+            <div id="section-1" class="form-section">
+                <h2 class="text-xl mb-8 serif-font border-l-2 border-stone-800 pl-4">第一章：個人志向</h2>
+                <div class="space-y-10">
+                    <div class="group">
+                        <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2">您的姓名</label>
+                        <input type="text" name="name" required placeholder="Name" class="input-underline w-full py-2">
+                    </div>
+                    <div class="group">
+                        <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2">人事編號</label>
+                        <input type="text" name="staff_id" required placeholder="Staff ID" class="input-underline w-full py-2">
+                    </div>
+                    <div class="group">
+                        <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2">目前職級</label>
+                        <select name="title" required class="input-underline w-full py-2 appearance-none cursor-pointer">
+                            <option value="">Select Identity</option>
+                            <option>PGY1</option><option>PGY2（內科組）</option><option>PGY2（不分組）</option>
+                            <option>R1</option><option>R2</option><option>R3</option><option>Fellow</option>
+                        </select>
+                    </div>
+                    <div class="group">
+                        <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2">既往訓練背景</label>
+                        <select name="past_training" required class="input-underline w-full py-2 appearance-none cursor-pointer">
+                            <option value="">Training Experience</option>
+                            <option>尚未開啟此領域</option><option>有過 1 次工作坊</option><option>頻率約 2–5 次</option><option>豐富經驗 (>5次)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: 實際操作經驗 (矩陣題) -->
+            <div id="section-2" class="form-section hidden">
+                <h2 class="text-xl mb-8 serif-font border-l-2 border-stone-800 pl-4">第二章：臨床實踐紀錄</h2>
+                <p class="text-xs text-slate-400 italic mb-8">請自評各項技術操作之熟稔程度</p>
+                <div class="space-y-8">
+                    <div class="border-b border-stone-50 pb-6">
+                        <p class="text-sm serif-font mb-4">Pneumothorax 影像辨認</p>
+                        <div class="flex gap-1">
+                            <label class="flex-1"><input type="radio" name="op_pneumo" value="從未看過" required class="hidden-input"><div class="choice-box text-center text-xs">從未</div></label>
+                            <label class="flex-1"><input type="radio" name="op_pneumo" value="指導下操作" class="hidden-input"><div class="choice-box text-center text-xs">指導</div></label>
+                            <label class="flex-1"><input type="radio" name="op_pneumo" value="可獨立完成" class="hidden-input"><div class="choice-box text-center text-xs">獨立</div></label>
+                        </div>
+                    </div>
+                    <div class="border-b border-stone-50 pb-6">
+                        <p class="text-sm serif-font mb-4">Pleural effusion 辨認</p>
+                        <div class="flex gap-1">
+                            <label class="flex-1"><input type="radio" name="op_effusion" value="從未看過" required class="hidden-input"><div class="choice-box text-center text-xs">從未</div></label>
+                            <label class="flex-1"><input type="radio" name="op_effusion" value="指導下操作" class="hidden-input"><div class="choice-box text-center text-xs">指導</div></label>
+                            <label class="flex-1"><input type="radio" name="op_effusion" value="可獨立完成" class="hidden-input"><div class="choice-box text-center text-xs">獨立</div></label>
+                        </div>
+                    </div>
+                    <div class="pb-6">
+                        <p class="text-sm serif-font mb-4">Pigtail / 穿刺引流實務</p>
+                        <div class="flex gap-1">
+                            <label class="flex-1"><input type="radio" name="op_pigtail" value="從未看過" required class="hidden-input"><div class="choice-box text-center text-xs">尚未</div></label>
+                            <label class="flex-1"><input type="radio" name="op_pigtail" value="指導下操作" class="hidden-input"><div class="choice-box text-center text-xs">協助</div></label>
+                            <label class="flex-1"><input type="radio" name="op_pigtail" value="可獨立完成" class="hidden-input"><div class="choice-box text-center text-xs">主導</div></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: 信心與時段 -->
+            <div id="section-3" class="form-section hidden">
+                <h2 class="text-xl mb-8 serif-font border-l-2 border-stone-800 pl-4">第三章：信心評估</h2>
+                <div class="mb-12">
+                    <label class="block text-sm serif-font mb-6">對於辨識異常影像的自我掌握度：</label>
+                    <div class="flex justify-between items-center px-2">
+                        <span class="text-[10px] uppercase tracking-widest text-slate-300">Novice</span>
+                        <div class="flex">
+                            <label><input type="radio" name="eff_2" value="1" required class="hidden-input"><div class="likert-scale-item text-xs">1</div></label>
+                            <label><input type="radio" name="eff_2" value="2" class="hidden-input"><div class="likert-scale-item text-xs">2</div></label>
+                            <label><input type="radio" name="eff_2" value="3" class="hidden-input"><div class="likert-scale-item text-xs">3</div></label>
+                            <label><input type="radio" name="eff_2" value="4" class="hidden-input"><div class="likert-scale-item text-xs">4</div></label>
+                            <label><input type="radio" name="eff_2" value="5" class="hidden-input"><div class="likert-scale-item text-xs">5</div></label>
+                        </div>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-300">Expert</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm serif-font mb-6">可參予實作之時空(可複選)</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center justify-between p-4 border border-stone-100 hover:bg-stone-50 cursor-pointer transition-all">
+                            <span class="text-sm">3/11 (三) 14:00-16:00</span>
+                            <input type="checkbox" name="slots" value="3/11" class="accent-stone-800">
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-stone-100 hover:bg-stone-50 cursor-pointer transition-all">
+                            <span class="text-sm">3/18 (三) 14:00-16:00</span>
+                            <input type="checkbox" name="slots" value="3/18" class="accent-stone-800">
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-stone-100 hover:bg-stone-50 cursor-pointer transition-all">
+                            <span class="text-sm">3/25 (三) 14:00-16:00</span>
+                            <input type="checkbox" name="slots" value="3/25" class="accent-stone-800">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: 動機期待 -->
+            <div id="section-4" class="form-section hidden">
+                <h2 class="text-xl mb-8 serif-font border-l-2 border-stone-800 pl-4">終章：願景與留白</h2>
+                <div class="space-y-8">
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-400 mb-4">對於此系列課程的學習期許</label>
+                        <textarea name="expectation" rows="6" required placeholder="Write your thoughts here..." class="w-full p-4 border border-stone-100 focus:border-stone-300 outline-none text-sm resize-none"></textarea>
+                    </div>
+                    <div class="py-4 border-t border-stone-50">
+                        <p class="text-[10px] text-slate-300 uppercase tracking-[0.2em] text-center">
+                            Synchronized with Google Sheets Database
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex justify-between items-center mt-12">
+                <button type="button" id="prevBtn" class="text-xs uppercase tracking-[0.2em] text-slate-300 hover:text-slate-600 transition-all opacity-0">Back</button>
+                <button type="button" id="nextBtn" class="btn-art px-10 py-3 text-xs uppercase">Next Page</button>
+                <button type="submit" id="submitBtn" class="btn-art px-10 py-3 text-xs uppercase hidden">Submit Form</button>
+            </div>
+
+            <!-- Loading -->
+            <div id="loader" class="hidden absolute inset-0 bg-white/95 flex flex-col items-center justify-center z-10">
+                <div class="w-6 h-6 border border-stone-800 border-t-transparent animate-spin"></div>
+                <p class="mt-6 text-[10px] uppercase tracking-widest text-stone-400">Processing Data...</p>
+            </div>
+        </form>
+
+        <!-- Success Message -->
+        <div id="successPanel" class="hidden text-center py-20 fade-in">
+            <h2 class="text-3xl serif-font text-slate-800 mb-6 tracking-widest">提交完成</h2>
+            <p class="text-slate-500 italic text-sm mb-12">我們已詳實紀錄您的報名意願，期待在課堂相見。</p>
+            <button onclick="location.reload()" class="text-xs uppercase tracking-widest border-b border-stone-800 pb-1">Return to Beginning</button>
+        </div>
+        
+        <footer class="text-center opacity-30 text-[9px] uppercase tracking-[0.3em]">
+            Artistic Inquiry & Medical Practice
+        </footer>
+    </div>
+
+    <script>
+        // 設定區
+        const GAS_URL = '您的_APPS_SCRIPT_URL'; 
+
+        let step = 1;
+        const form = document.getElementById('enrollmentForm');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function updateDisplay() {
+            // 切換區塊
+            document.querySelectorAll('.form-section').forEach((el, idx) => {
+                el.classList.toggle('hidden', idx + 1 !== step);
+            });
+            // 更新進度標籤
+            document.querySelectorAll('.step-label').forEach((label, idx) => {
+                label.classList.toggle('step-active-text', idx + 1 === step);
+            });
+            // 按鈕控制
+            prevBtn.style.opacity = (step === 1) ? '0' : '1';
+            prevBtn.disabled = (step === 1);
+            
+            if (step === 4) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        nextBtn.addEventListener('click', () => {
+            const currentSection = document.getElementById(`section-${step}`);
+            const requireds = currentSection.querySelectorAll('[required]');
+            let allFilled = true;
+
+            requireds.forEach(input => {
+                if (input.type === 'radio') {
+                    const name = input.name;
+                    if (!currentSection.querySelector(`input[name="${name}"]:checked`)) allFilled = false;
+                } else if (!input.value) {
+                    allFilled = false;
+                }
+            });
+
+            if (allFilled) {
+                step++;
+                updateDisplay();
+            } else {
+                alert('請先填寫完目前分頁的必填項目。');
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            step--;
+            updateDisplay();
+        });
+
+        // 樣式聯動
+        form.addEventListener('change', (e) => {
+            if (e.target.type === 'radio') {
+                const parent = e.target.closest('.flex');
+                parent.querySelectorAll('.choice-box, .likert-scale-item').forEach(el => el.classList.remove('selected-box', 'bg-stone-800', 'text-white'));
+                const indicator = e.target.nextElementSibling;
+                indicator.classList.add('selected-box');
+                if(indicator.classList.contains('likert-scale-item')) {
+                   indicator.classList.add('bg-stone-800', 'text-white');
+                }
+            }
+        });
+
+        // 提交
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            document.getElementById('loader').classList.remove('hidden');
+
+            const fd = new FormData(form);
+            const params = new URLSearchParams();
+            
+            fd.forEach((value, key) => {
+                if (params.has(key)) {
+                    params.set(key, params.get(key) + ", " + value);
+                } else {
+                    params.set(key, value);
+                }
+            });
+
+            try {
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: params
+                });
+                
+                form.classList.add('hidden');
+                document.getElementById('successPanel').classList.remove('hidden');
+                document.querySelectorAll('.step-label').forEach(el => el.style.opacity = '0');
+            } catch (err) {
+                alert('發生錯誤，請稍後重試。');
+                document.getElementById('loader').classList.add('hidden');
+            }
+        };
+    </script>
+</body>
+</html>
